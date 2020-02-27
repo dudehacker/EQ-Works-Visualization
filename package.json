@@ -11,15 +11,18 @@
     "@urbica/react-map-gl-cluster": "^0.2.0",
     "axios": "^0.19.2",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-favicon": "^2.0.1",
     "mapbox-gl": "^1.8.1",
     "numeral": "^2.0.6",
+    "path": "^0.12.7",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-scripts": "3.4.0",
     "typeface-roboto": "0.0.75"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
