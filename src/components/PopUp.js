@@ -13,7 +13,6 @@ export default function PopUp ({open,onClose,selected}) {
           const result = await axios(
             process.env.REACT_APP_DATA+'/poi',
           );
-          console.log(result.data)
           setPoi(result.data);
         }
         fetchData();
@@ -24,7 +23,6 @@ export default function PopUp ({open,onClose,selected}) {
           const result = await axios(
             process.env.REACT_APP_DATA+'/stats/hourly',
           );
-          console.log(result.data)
           setStats(result.data);
         }
         fetchData();
