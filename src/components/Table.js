@@ -1,35 +1,38 @@
 import React from "react";
 import MaterialTable from "material-table";
+import {formatNumber} from './Map'
+const columns = [
+  { title: "Name", field: "name"},
+  { title: "Clicks", field: "clicks" },
+  { title: "Impressions", field: "impressions" },
+  { title: "Revenue", field: "revenue" },
+  { title: "Hour", field: "hour" },
+  { title: "Date", field: "date", type:"date", defaultSort: "desc" }
+];
 
-export default function Table() {
-  const [state, setState] = React.useState({
-    columns: [
-      { title: "Name", field: "name" },
-      { title: "Surname", field: "surname" },
-      { title: "Birth Year", field: "birthYear", type: "numeric" },
-      {
-        title: "Birth Place",
-        field: "birthCity"
-      }
-    ],
-    data: [
-      { name: "Mehmet", surname: "Baran", birthYear: 1987, birthCity: 63 },
-      {
-        name: "Zerya Betül",
-        surname: "Baran",
-        birthYear: 2017,
-        birthCity: 34
-      }
-    ]
-  });
+const prepData = ({poi,stats,selected} ) => {
+
+    let data =  stats.filter(e=>selected.includes(e.poi_id)).map(e=>{
+        e.name = poi.find(p=>p.poi_id===e.poi_id).name
+        e.revenue = formatNumber("revenue",e.revenue)
+        return e
+    })
+    console.log(data)
+    return data
+};
+
+export default function Table(props) {
+  console.log(props);
+
 
   return (
     <MaterialTable
       title="Stats"
-      columns={state.columns}
-      data={state.data}
+      columns={columns}
+      data={prepData(props)}
       options={{
-        search: true
+        search: true,
+        grouping: true
       }}
     />
   );

@@ -33,8 +33,8 @@ export default function PopUp ({open,onClose,selected}) {
     return (<Dialog onClose={onClose} aria-labelledby="simple-dialog-title" open={open}
     maxWidth="xl" fullWidth>
         <DialogContent>
-        <h1>Selected {selected}</h1>
-        <Table />
+        <h1>Selected: {selected.length}</h1>
+        <Table poi={poi} stats={stats} selected={selected}/>
         </DialogContent>
     </Dialog>)
 }

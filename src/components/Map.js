@@ -28,7 +28,7 @@ const distance = (x1, x2, y1, y2) => {
   return Math.sqrt((x1 - x2) ^ (2 + (y1 - y2)) ^ 2);
 };
 
-const formatNumber = (key, value) => {
+export const formatNumber = (key, value) => {
   switch (key) {
     case "revenue":
       return numeral(value).format("$ 0.00 a");
