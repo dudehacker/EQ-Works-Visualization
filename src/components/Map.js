@@ -3,7 +3,8 @@ import MapGL, { Marker } from "@urbica/react-map-gl";
 import Cluster from "@urbica/react-map-gl-cluster";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { AppBar, Paper, Tabs, Tab } from "@material-ui/core";
-import numeral from 'numeral'
+import numeral from "numeral";
+import PopUp from "./PopUp";
 
 const initialState = {
   viewport: {
@@ -13,7 +14,7 @@ const initialState = {
   }
 };
 
-const style = {
+var style = {
   width: "50px",
   height: "50px",
   padding: "40px",
@@ -23,39 +24,60 @@ const style = {
   textAlign: "center"
 };
 
-const distance = (x1,x2,y1,y2) => {
-  return Math.sqrt(  (x1 - x2)^2 + (y1 - y2)^2  )
-}
+const distance = (x1, x2, y1, y2) => {
+  return Math.sqrt((x1 - x2) ^ (2 + (y1 - y2)) ^ 2);
+};
 
-const formatNumber = (key,value) => {
-  switch(key){
+const formatNumber = (key, value) => {
+  switch (key) {
     case "revenue":
-    return numeral(value).format('$ 0.00 a')
-
+      return numeral(value).format("$ 0.00 a");
 
     default:
-      return numeral(value).format('0.0a')
+      return numeral(value).format("0.0a");
   }
-}
+};
 
 export default function Map({ poi, features }) {
   const [state, setState] = useState(initialState);
-
   const [filter, setFilter] = useState("revenue");
+  const [showPopup, setShowPopup] = useState(false);
+  const [selected, setSelected] = useState([]);
+  const [hover, setHover] = useState(false);
 
   const handleChange = (event, newValue) => {
     setFilter(newValue);
   };
 
   const ClusterMarker = props => {
-    let sorted = poi.slice().sort((a,b) => distance(a.lat,props.latitude,a.lon,props.longitude) - distance(b.lat,props.latitude,b.lon,props.longitude))
-    let filtered = sorted.slice(0,props.pointCount)
-    let clusterPoiIds = filtered.map(e => e.poi_id)
-    let value = features.filter(e=>clusterPoiIds.includes(e.poi_id)).reduce((acc, cur) => acc + Number(cur[filter]), 0)
+    let sorted = poi
+      .slice()
+      .sort(
+        (a, b) =>
+          distance(a.lat, props.latitude, a.lon, props.longitude) -
+          distance(b.lat, props.latitude, b.lon, props.longitude)
+      );
+    let filtered = sorted.slice(0, props.pointCount);
+    let clusterPoiIds = filtered.map(e => e.poi_id);
+    let value = features
+      .filter(e => clusterPoiIds.includes(e.poi_id))
+      .reduce((acc, cur) => acc + Number(cur[filter]), 0);
+
+    const onClusterClick = props => {
+      console.log("clicked on cluster");
+      setSelected(clusterPoiIds);
+      setShowPopup(true);
+    };
+    let newStyle = Object.assign({cursor: hover?"pointer":"default"},style)
     return (
       <Marker longitude={props.longitude} latitude={props.latitude}>
-        <div style={{ ...style, background: "#f28a25" }}>
-          {formatNumber(filter,value)}
+        <div
+          onClick={onClusterClick}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          style={{ ...newStyle, background: "#f28a25" }}
+        >
+          {formatNumber(filter, value)}
         </div>
       </Marker>
     );
@@ -79,7 +101,11 @@ export default function Map({ poi, features }) {
           </Tabs>
         </Paper>
       </AppBar>
-
+      {showPopup && <PopUp
+        open={showPopup}
+        selected={selected}
+        onClose={() => setShowPopup(false)}
+      />}
       <MapGL
         style={{ width: "100%", height: "900px" }}
         mapStyle="mapbox://styles/mapbox/light-v9"
@@ -94,19 +120,31 @@ export default function Map({ poi, features }) {
           radius={40}
           extent={512}
           nodeSize={64}
-          component={ClusterMarker}
+          component={cluster => <ClusterMarker {...cluster} />}
         >
           {poi.map((point, i) => {
             let value = features
               .filter(e => e.poi_id === point.poi_id)
               .reduce((acc, cur) => acc + Number(cur[filter]), 0);
+              let newStyle = Object.assign({cursor: hover?"pointer":"default"},style)
             return (
               <Marker
                 key={filter + i}
                 longitude={point.lon}
                 latitude={point.lat}
               >
-                <div style={style}>{formatNumber(filter,value)}</div>
+                <div
+                  onClick={() => {
+                    console.log("clicked on single");
+                    setSelected([point.poi_id]);
+                    setShowPopup(true);
+                  }}
+                  onMouseEnter={() => setHover(true)}
+                  onMouseLeave={() => setHover(false)}
+                  style={newStyle}
+                >
+                  {formatNumber(filter, value)}
+                </div>
               </Marker>
             );
           })}
